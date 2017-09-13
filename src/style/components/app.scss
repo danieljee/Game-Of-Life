@@ -1,0 +1,35 @@
+.gameContainer{
+  padding: 10px;
+  margin:auto;
+  margin-top: 80px;
+  margin-bottom: 100px;
+  color: #000;
+}
+.header{
+  width: 600px;
+  margin:auto;
+}
+.footer{
+  width: 600px;
+  margin:auto;
+}
+.panel{
+  background-color: #000;
+  margin: auto;
+}
+
+.row{
+  margin:0;
+  padding: 0;
+}
+
+.alive{
+  background-color: #f50000;
+}
+
+.cell{
+  margin:0;
+  float:left;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}

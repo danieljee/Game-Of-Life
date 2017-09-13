@@ -1,0 +1,27 @@
+#root .gameContainer {
+  padding: 10px;
+  margin: auto;
+  margin-top: 80px;
+  margin-bottom: 100px;
+  color: #000; }
+#root .header {
+  width: 600px;
+  margin: auto; }
+#root .footer {
+  width: 600px;
+  margin: auto; }
+#root .panel {
+  background-color: #000;
+  margin: auto; }
+#root .row {
+  margin: 0;
+  padding: 0; }
+#root .alive {
+  background-color: #f50000; }
+#root .cell {
+  margin: 0;
+  float: left;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc; }
+
+/*# sourceMappingURL=main.css.map */
