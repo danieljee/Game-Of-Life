@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import * as actions from '../actions/size';
+import {changeSpeedSlow, changeSpeedNormal, changeSpeedFast} from '../actions/speed';
 // export default ({changeSize}) => {
 class Footer extends Component{
 
@@ -14,6 +15,20 @@ class Footer extends Component{
         return;
       case 2:
         this.props.changeSizeBig();
+        return;
+    }
+  }
+
+  changeSpeed(n){
+    switch(n){
+      case 0:
+        this.props.changeSpeedSlow();
+        return;
+      case 1:
+        this.props.changeSpeedNormal();
+        return;
+      case 2:
+        this.props.changeSpeedFast();
         return;
     }
   }
@@ -40,9 +55,9 @@ class Footer extends Component{
           </div>
           <div className='col m10'>
             <div className='row'>
-              <div className="col m4"><button className='btn'>Slow</button></div>
-              <div className="col m4"><button className='btn'>Medium</button></div>
-              <div className="col m4"><button className='btn'>Fast</button></div>
+              <div className="col m4"><button className='btn' onClick={this.changeSpeed.bind(this, 0)}>Slow</button></div>
+              <div className="col m4"><button className='btn' onClick={this.changeSpeed.bind(this, 1)}>Medium</button></div>
+              <div className="col m4"><button className='btn' onClick={this.changeSpeed.bind(this, 2)}>Fast</button></div>
             </div>
           </div>
         </div>
@@ -57,4 +72,27 @@ function mapStateToProps(state){
   };
 }
 
-export default connect(mapStateToProps, actions)(Footer);
+function mapDispatchToProps(dispatch){
+  return {
+    changeSizeSmall: ()=>{
+      dispatch(actions.changeSizeSmall());
+    },
+    changeSizeMedium: () => {
+      dispatch(actions.changeSizeMedium());
+    },
+    changeSizeLarge: () => {
+      dispatch(actions.changeSizeBig());
+    },
+    changeSpeedSlow: () => {
+      dispatch(changeSpeedSlow());
+    },
+    changeSpeedNormal: () => {
+      dispatch(changeSpeedNormal());
+    },
+    changeSpeedFast: () => {
+      dispatch(changeSpeedFast());
+    },
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Footer);

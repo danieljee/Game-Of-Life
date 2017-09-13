@@ -1,178 +1,70 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import * as actions from '../actions/speed';
+import {incrementGeneration, resetGeneration} from '../actions/other';
 import start from '../etc/logic';
 
 class Panel extends Component{
   constructor(){
     super();
     this.state = {
+      firstLoaded: true,
       intervalId: null
     };
   }
   componentDidMount(){
-    // if (this.props.firstLoaded){
-    //   let total = 0;
-    //   const cells = document.getElementsByClassName('cell');
-    //   for(var i = 0; i < cells.length; i++){
-    //     let rand = Math.random();
-    //     if (rand< 0.5){
-    //       cells[i].classList.remove('dead');
-    //       cells[i].classList.add('alive');
-    //       total++;
-    //     }
-    //   }
-    //   this.props.changeFirstLoaded();
-    // }
-    const cells = document.getElementsByClassName('cell');
-    cells[0].classList.add('alive');
-    cells[0].classList.remove('dead');
-    this.resumeGame();
+    if (this.state.firstLoaded){
+      let total = 0;
+      const cells = document.getElementsByClassName('cell');
+      for(var i = 0; i < cells.length; i++){
+        let rand = Math.random();
+        if (rand< 0.5){
+          cells[i].classList.remove('dead');
+          cells[i].classList.add('alive');
+          total++;
+        }
+      }
+      this.setState({
+        firstLoaded:false
+      });
+    }
+
+    this.startGame(this.props.speed.simSpeed);
   }
 
-  resumeGame(){
-    if (this.props.speed.paused){
-      console.log('game paused');
-      if (this.state.intervalId) clearInterval(this.state.intervalId);
-      console.log('interval cleared');
-      return;
-    }
+  startGame(speed){
     const columns = this.props.size.columns;
     const rows = this.props.size.rows;
-    const cornerIndex = [0, columns - 1, (rows-1) * columns, rows * columns - 1];
-    function kill(obj){
-      obj.classList.remove('markDead');
-      obj.classList.remove('alive');
-      obj.classList.add('dead');
-    }
+    this.setState({
+      intervalId: start(columns, rows, speed, this.props.pauseGame, this.props.incrementGeneration, this.props.resetGeneration)
+    });
+  }
 
-    function regen(obj){
-      obj.classList.remove('markLive');
-      obj.classList.remove('dead');
-      obj.classList.add('alive');
-    }
-
-    function markDead(obj){
-      obj.classList.add('markDead');
-    }
-
-    function markLive(obj){
-      obj.classList.add('markLive');
-    }
-
-    function corners(cells, i){
-      if (cells[i].classList.contains('alive')){
-        if (i == 0){
-          if (cells[i+1+columns].classList.contains('alive')){
-            if (!cells[i+1].classList.contains('alive') && !cells[i+columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          } else {
-            if (!cells[i+1].classList.contains('alive') || !cells[i+columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          }
-        } else if (i == columns - 1){
-          if (cells[i-1+columns].classList.contains('alive')){
-            if (!cells[i-1].classList.contains('alive') && !cells[i+columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          } else {
-            if (!cells[i-1].classList.contains('alive') || !cells[i+columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          }
-        } else if (i == (rows-1) * columns){
-          if (cells[i+1-columns].classList.contains('alive')){
-            if (!cells[i+1].classList.contains('alive') && !cells[i-columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          } else {
-            if (!cells[i+1].classList.contains('alive') || !cells[i-columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          }
-        } else {
-          if (cells[i-1-columns].classList.contains('alive')){
-            if (!cells[i-1].classList.contains('alive') && !cells[i-columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          } else {
-            if (!cells[i-1].classList.contains('alive') || !cells[i-columns].classList.contains('alive')){
-              markDead(cells[i]);
-            }
-          }
-        }
-      } else {
-        if (i == 0){
-          if (cells[i+1].classList.contains('alive') && cells[i+columns].classList.contains('alive')&& cells[i+1+columns].classList.contains('alive')){
-            markLive(cells[i]);
-          }
-        } else if (i == columns - 1){
-          if (cells[i-1].classList.contains('alive') && cells[i+columns].classList.contains('alive')&& cells[i-1+columns].classList.contains('alive')){
-            markLive(cells[i]);
-          }
-        } else if (i == (rows-1) * columns){
-          if (cells[i+1].classList.contains('alive') && cells[i-columns].classList.contains('alive')&& cells[i+1-columns].classList.contains('alive')){
-            markLive(cells[i]);
-          }
-        } else {
-          if (cells[i-1].classList.contains('alive') && cells[i-columns].classList.contains('alive')&& cells[i-1-columns].classList.contains('alive')){
-            markLive(cells[i]);
-          }
-        }
+  componentWillReceiveProps(nextProp){
+    console.log('received props!');
+    console.log(nextProp);
+    if (nextProp.speed.paused){
+      console.log('game paused');
+      clearInterval(this.state.intervalId);
+      if(nextProp.speed.cleared){
+        console.log('cleared');
+        this.clearPanel();
       }
+    } else if (nextProp.speed.simSpeed !== this.props.speed.simSpeed) {
+      clearInterval(this.state.intervalId);
+      this.startGame(nextProp.speed.simSpeed);
+    } else {
+      console.log('game resumed');
+      this.startGame(nextProp.speed.simSpeed);
     }
+  }
 
-    function firstRow(cells, i){
-      if (cells[i].classList.contains('alive')){
-
-      } else {
-
-      }
+  clearPanel(){
+    const cells = document.querySelectorAll('.alive');
+    for(var i = 0; i < cells.length; i++){
+        cells[i].classList.remove('alive');
+        cells[i].classList.add('dead');
     }
-
-    var intervalId = setInterval(() => {
-      if (document.getElementsByClassName('alive').length == 0){
-        console.log('interval is cleared');
-        return clearInterval(intervalId);
-      }
-      var cells = document.querySelectorAll('.cell');
-      for (let i=0; i<cells.length; i++){
-        if (cornerIndex.includes(i)){
-          corners(cells, i);
-        } else if (i > 0 && i < columns){ //first row
-          firstRow(cells, i);
-        } else if (i % columns == 0){ //left column
-
-        } else if ((i + 1) % columns == 0){ //right column
-
-        } else if (i > (rows-1) * columns && i < rows * columns - 1){ //bottom
-
-        } else {
-
-        }
-
-        //if first row don't check its top row
-        //if last row don't check its bottom row
-        //if left column , don't check its topleft, left, bottomleft
-        //if right column, don't check its top right, right, bottomright
-        //top-left = i - 1 - this.props.size.columns
-        //top = i - this.props.size.columns
-        //top-right i + 1 - this.props.size.columns
-        //bottom-left = i - 1 + columns
-        //bottom = i + columns
-        //bottom right = i + columns + 1
-
-      }
-
-      [...document.querySelectorAll('.markDead')].map((cell) => {
-        console.log(cell);
-        kill(cell);
-      });
-      [...document.querySelectorAll('.markLive')].map((cell) => {
-        regen(cell);
-      });
-    }, 2000);
   }
 
   componentDidUpdate(nextProp){
@@ -185,12 +77,16 @@ class Panel extends Component{
           total++;
         }
       }
-      this.resumeGame();
   }
 
-  generateCell(e){
-    e.target.classList.remove('dead');
-    e.target.classList.add('alive');
+  toggleCell(e){
+    if (e.target.classList.contains('dead')){
+      e.target.classList.remove('dead');
+      e.target.classList.add('alive');
+      return;
+    }
+    e.target.classList.add('dead');
+    e.target.classList.remove('alive');
   }
 
   renderGrid(){
@@ -200,7 +96,7 @@ class Panel extends Component{
     var total = rows * columns;
     var cells = [];
     for (let i=0; i<total; i++){
-      cells.push(<div id = {i} key={i + 1234} onClick={this.generateCell} className='cell dead' style={{width:colWidth, height: rowHeight}}></div>)
+      cells.push(<div id = {i} key={i + 1234} onClick={this.toggleCell} className='cell dead' style={{width:colWidth, height: rowHeight}}></div>)
     }
     return React.createElement('div', {className: 'panel', style:{width, height}}, cells);
   }
@@ -217,4 +113,18 @@ function mapStateToProps(state){
   };
 }
 
-export default connect(mapStateToProps)(Panel);
+function mapDispatchToProps(dispatch){
+  return {
+    pauseGame: () => {
+      dispatch(actions.pauseGame());
+    },
+    incrementGeneration: () => {
+      dispatch(incrementGeneration());
+    },
+    resetGeneration: () => {
+      dispatch(resetGeneration());
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Panel);
